@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>MobileCN Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <style>
         /* =========================== */
         /* GLOBAL & SCROLL STYLES      */
@@ -69,7 +69,6 @@
             border-bottom: 3px solid #1f2d3d;
         }
 
-        /* --- Logo 区域 --- */
         .brand-logo {
             position: absolute;
             top: 30px;
@@ -104,7 +103,6 @@
             padding-left: 10px; 
         }
 
-        /* Map Container */
         #map-container {
             width: 70%;
             height: 100%;
@@ -118,7 +116,6 @@
             z-index: 1;
         }
 
-        /* Data Panel (Right Side) */
         #data-panel {
             width: 30%;
             height: 100%;
@@ -143,7 +140,6 @@
         .image-container img { width: 100%; height: 100%; object-fit: contain; display: block; opacity: 0; transition: opacity 0.4s ease; }
         .loading-text { position: absolute; color: #444; font-size: 12px; }
         
-        /* 下载按钮区域样式 */
         .download-section {
             margin-top: 15px;
             display: flex;
@@ -200,7 +196,6 @@
             gap: 25px;
         }
 
-        /* 【修改】Grid Box 样式 */
         .grid-box { 
             background: #161b22; 
             border: 2px solid #30363d; 
@@ -208,11 +203,8 @@
             overflow: hidden; 
             position: relative; 
             transition: all 0.3s ease; 
-            
-            /* 修改为纵向布局 */
             display: flex; 
             flex-direction: column; 
-            /* 增加内边距 */
             padding: 20px; 
         }
 
@@ -222,7 +214,6 @@
             transform: translateY(-5px); 
         }
 
-        /* 【新增】小框内的标题样式 */
         .grid-title {
             color: #00f2ff;
             font-size: 18px;
@@ -230,14 +221,13 @@
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            flex-shrink: 0; /* 防止标题被压缩 */
+            flex-shrink: 0;
             border-left: 4px solid #00f2ff;
             padding-left: 10px;
         }
 
-        /* 【新增】图片容器，让图片自适应中间空间 */
         .grid-img-wrapper {
-            flex-grow: 1; /* 占据剩余空间 */
+            flex-grow: 1;
             width: 100%;
             overflow: hidden;
             border-radius: 6px;
@@ -250,11 +240,10 @@
         .grid-img-wrapper img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* 或者 contain，取决于你想怎么展示图片 */
+            object-fit: cover; 
             display: block; 
         }
 
-        /* 【新增】底部描述文字样式 */
         .grid-desc {
             color: #aab2c0;
             font-size: 13px;
@@ -263,9 +252,8 @@
         }
         
         .grid-desc p {
-            margin: 0; /* 去掉段落默认间距 */
+            margin: 0; 
         }
-        /* 第二行文字稍微淡一点 */
         .grid-desc p:last-child {
             color: #6e7681;
             margin-top: 4px;
@@ -415,11 +403,16 @@
             { name: "Zhumadian", value: [114.1088, 32.9074] }
         ];
 
-        // Map Logic
+        // 初始化 ECharts
         var chart = echarts.init(document.getElementById('map-container'));
 
-        $.getJSON('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', function(geoJson) {
+        // ==========================================
+        // 重要修改：使用相对路径读取你上传的 geojson 文件
+        // 请确保文件名与你仓库中的文件名完全一致（包括大小写）
+        // ==========================================
+        $.getJSON('./china.json', function(geoJson) {
             echarts.registerMap('china', geoJson);
+            
             var option = {
                 backgroundColor: 'rgba(0,0,0,0)',
                 geo: {
@@ -437,7 +430,10 @@
                         shadowColor: 'rgba(0, 0, 0, 0.5)',
                         shadowBlur: 10
                     },
-                    emphasis: { label: { show: false }, itemStyle: { areaColor: '#2a3b55' } }
+                    emphasis: { 
+                        label: { show: false }, 
+                        itemStyle: { areaColor: '#2a3b55' } 
+                    }
                 },
                 series: [
                     {
@@ -448,13 +444,21 @@
                         symbolSize: 8, 
                         rippleEffect: { brushType: 'fill', scale: 4 },
                         itemStyle: { color: '#00f2ff', shadowBlur: 10, shadowColor: '#00f2ff' },
-                        tooltip: { show: true, formatter: '{b}', backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#00f2ff', textStyle: { color: '#fff' } },
+                        tooltip: { 
+                            show: true, 
+                            formatter: '{b}', 
+                            backgroundColor: 'rgba(0,0,0,0.8)', 
+                            borderColor: '#00f2ff', 
+                            textStyle: { color: '#fff' } 
+                        },
                         emphasis: { scale: 1.5, itemStyle: { color: '#fff' } },
                         cursor: 'pointer'
                     }
                 ]
             };
             chart.setOption(option);
+        }).fail(function() {
+            console.error("无法加载地图文件，请检查 ./china.geojson 是否存在且路径正确。");
         });
 
         function loadImage(imgId, path, fallbackText) {
@@ -464,7 +468,10 @@
                 imgEl.attr('src', path);
                 imgEl.off('load error'); 
                 imgEl.on('load', function() { $(this).css('opacity', 1); });
-                imgEl.on('error', function() { $(this).attr('src', "https://via.placeholder.com/600x400/000/333?text=" + encodeURIComponent(fallbackText)); $(this).css('opacity', 1); });
+                imgEl.on('error', function() { 
+                    $(this).attr('src', "https://via.placeholder.com/600x400/000/333?text=" + encodeURIComponent(fallbackText)); 
+                    $(this).css('opacity', 1); 
+                });
             }, 100);
         }
 
