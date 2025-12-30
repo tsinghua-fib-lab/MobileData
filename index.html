@@ -1,61 +1,501 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>数据下载页面</title>
+    <title>MobileCN Dashboard</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <style>
-        /* 简单的页面布局样式 */
+        /* =========================== */
+        /* GLOBAL & SCROLL STYLES      */
+        /* =========================== */
         body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0f19;
+            color: white;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .full-screen-section {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* =========================== */
+        /* NAVIGATION STYLES           */
+        /* =========================== */
+        .top-nav {
+            position: absolute;
+            top: 130px;      
+            left: 40px;      
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .top-nav a {
+            text-decoration: none;
+            color: #aab2c0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 16px;
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .top-nav a:hover {
+            color: #00f2ff;
+            border-color: #00f2ff;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+            background: rgba(22, 27, 34, 1);
+            transform: translateY(-2px);
+        }
+
+        /* =========================== */
+        /* PAGE 1 STYLES               */
+        /* =========================== */
+        #page-one {
+            display: flex;
+            border-bottom: 3px solid #1f2d3d;
+        }
+
+        /* --- Logo 区域 --- */
+        .brand-logo {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .logo-text {
+            font-size: 42px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 1px;
+            margin: 0;
+            line-height: 1;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }
+
+        .logo-highlight { color: #00f2ff; }
+
+        .logo-desc {
+            font-size: 14px;
+            color: #aab2c0; 
+            margin-top: 10px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            max-width: 800px; 
+            white-space: nowrap; 
+            line-height: 1.5;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
+            border-left: 3px solid #00f2ff; 
+            padding-left: 10px; 
+        }
+
+        /* Map Container */
+        #map-container {
+            width: 70%;
+            height: 100%;
+            position: relative;
+            padding-top: 180px; 
+            box-sizing: border-box; 
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 1;
+        }
+
+        /* Data Panel (Right Side) */
+        #data-panel {
+            width: 30%;
+            height: 100%;
+            background: rgba(17, 25, 38, 0.95);
             display: flex;
             flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            border-left: 2px solid #1f2d3d;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        .panel-header { margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px; flex-shrink: 0; }
+        .panel-title { font-size: 26px; color: #00f2ff; margin: 0; font-weight: bold; text-transform: uppercase; }
+        .panel-subtitle { color: #666; font-size: 12px; margin-top: 5px; font-weight: 600; }
+        
+        .charts-wrapper { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; overflow: hidden; min-height: 0; }
+        .chart-card { flex: 1; background: #000; border: 1px solid #333; border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; position: relative; min-height: 0; }
+        .chart-label { background: rgba(255, 255, 255, 0.05); color: #8892b0; font-size: 11px; padding: 5px 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #222; flex-shrink: 0; }
+        .image-container { flex-grow: 1; width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #050505; }
+        .image-container img { width: 100%; height: 100%; object-fit: contain; display: block; opacity: 0; transition: opacity 0.4s ease; }
+        .loading-text { position: absolute; color: #444; font-size: 12px; }
+        
+        /* 下载按钮区域样式 */
+        .download-section {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            opacity: 0.3; 
+            pointer-events: none; 
+            transition: all 0.3s ease;
+        }
+        
+        .download-section.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .cyber-btn {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-            font-family: Arial, sans-serif;
+            height: 40px;
+            text-decoration: none;
+            color: #00f2ff;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 1px solid #00f2ff;
+            background: rgba(0, 242, 255, 0.05);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* 图标容器样式 */
-        .download-btn {
-            cursor: pointer; /* 鼠标放上去变成小手 */
-            transition: transform 0.2s; /* 点击时的动画效果 */
-            text-decoration: none; /* 去掉下划线 */
-            text-align: center;
-            color: #333;
+        .cyber-btn:hover {
+            background: rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+        }
+        
+        .cyber-btn i { margin-right: 5px; font-style: normal; font-size: 14px; }
+        .footer-info { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #444; font-family: 'Courier New', monospace; flex-shrink: 0; }
+
+        /* =========================== */
+        /* PAGE 2 STYLES (Grid)        */
+        /* =========================== */
+        #page-two {
+            padding: 30px;
+            background-color: #0d1117;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 25px;
         }
 
-        /* 鼠标悬停时的效果 */
-        .download-btn:hover {
-            transform: scale(1.1); /* 放大一点点 */
+        /* 【修改】Grid Box 样式 */
+        .grid-box { 
+            background: #161b22; 
+            border: 2px solid #30363d; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            position: relative; 
+            transition: all 0.3s ease; 
+            
+            /* 修改为纵向布局 */
+            display: flex; 
+            flex-direction: column; 
+            /* 增加内边距 */
+            padding: 20px; 
         }
 
-        /* 图标本身的样式 */
-        .icon-svg {
-            width: 80px;
-            height: 80px;
-            fill: #4CAF50; /* 图标颜色：绿色 */
-            margin-bottom: 10px;
+        .grid-box:hover { 
+            border-color: #00f2ff; 
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); 
+            transform: translateY(-5px); 
         }
 
-        h2 {
-            margin-top: 0;
+        /* 【新增】小框内的标题样式 */
+        .grid-title {
+            color: #00f2ff;
             font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0; /* 防止标题被压缩 */
+            border-left: 4px solid #00f2ff;
+            padding-left: 10px;
+        }
+
+        /* 【新增】图片容器，让图片自适应中间空间 */
+        .grid-img-wrapper {
+            flex-grow: 1; /* 占据剩余空间 */
+            width: 100%;
+            overflow: hidden;
+            border-radius: 6px;
+            background: #000;
+            border: 1px solid #333;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .grid-img-wrapper img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* 或者 contain，取决于你想怎么展示图片 */
+            display: block; 
+        }
+
+        /* 【新增】底部描述文字样式 */
+        .grid-desc {
+            color: #aab2c0;
+            font-size: 13px;
+            line-height: 1.5;
+            flex-shrink: 0;
+        }
+        
+        .grid-desc p {
+            margin: 0; /* 去掉段落默认间距 */
+        }
+        /* 第二行文字稍微淡一点 */
+        .grid-desc p:last-child {
+            color: #6e7681;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
 
-    <a href="https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/chengdu_traffic_2000m.npz" download="My_Dataset_2025" class="download-btn">
+    <nav class="top-nav">
+        <a href="data_description.html">Data Description</a>
+        <a href="method.html">Method</a>
+        <a href="contact_us.html">Contact Us</a>
+    </nav>
+
+    <section id="page-one" class="full-screen-section">
+        <div class="brand-logo">
+            <div class="logo-text">Mobile<span class="logo-highlight">CN</span></div>
+            <div class="logo-desc">An Open Dataset for Mobile traffic and Active users in China</div>
+        </div>
+        <div id="map-container"></div>
+        <div id="data-panel">
+            <div class="panel-header">
+                <h1 class="panel-title" id="city-title">DATA MONITOR</h1>
+                <div class="panel-subtitle">SELECT A CITY TO VIEW DETAILS</div>
+            </div>
+            <div class="charts-wrapper">
+                <div class="chart-card">
+                    <div class="chart-label">Network / Traffic Analysis</div>
+                    <div class="image-container">
+                        <div class="loading-text">Waiting...</div>
+                        <img id="img-traffic" src="" alt="Traffic Data">
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-label">Demographics / User Data</div>
+                    <div class="image-container">
+                        <div class="loading-text">Waiting...</div>
+                        <img id="img-user" src="" alt="User Data">
+                    </div>
+                </div>
+            </div>
+            <div class="download-section" id="dl-section">
+                <a href="#" class="cyber-btn" id="btn-traffic" download>
+                    <i>⬇</i> Traffic Data
+                </a>
+                <a href="#" class="cyber-btn" id="btn-user" download>
+                    <i>⬇</i> User Data
+                </a>
+            </div>
+            <div class="footer-info">
+                <span id="city-status">Status: Standby</span>
+                <span id="coords-text">-- N, -- E</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-two" class="full-screen-section">
         
-        <svg class="icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C6.48 2 2 4.02 2 6.5C2 8.98 6.48 11 12 11C17.52 11 22 8.98 22 6.5C22 4.02 17.52 2 12 2ZM12 4C16.66 4 20 5.48 20 6.5C20 7.52 16.66 9 12 9C7.34 9 4 7.52 4 6.5C4 5.48 7.34 4 12 4Z"/>
-            <path d="M2 9.5C2 10.99 5.09 12.36 9 12.83V16.5C5.09 16.03 2 14.66 2 13.17V9.5Z"/>
-            <path d="M22 9.5V13.17C22 14.66 18.91 16.03 15 16.5V12.83C18.91 12.36 22 10.99 22 9.5Z"/>
-            <path d="M12 15C16.66 15 20 16.05 20 17.5V19.83C18.91 20.3 17.5 20.61 16 20.81V17.07C14.77 17.2 13.43 17.27 12 17.27C10.57 17.27 9.23 17.2 8 17.07V20.81C6.5 20.61 5.09 20.3 4 19.83V17.5C4 16.05 7.34 15 12 15Z"/>
-        </svg>
-        
-        <h2>点击下载数据</h2>
-    </a>
-    </body>
+        <div class="grid-box">
+            <div class="grid-title">Wireless Optimization</div>
+            <div class="grid-img-wrapper">
+                <img src="./usage_img/wireless_optimization.png" alt="Wireless Optimization">
+            </div>
+            <div class="grid-desc">
+                <p>Advanced analysis of signal strength.</p>
+                <p>Optimization algorithms for 5G networks.</p>
+            </div>
+        </div>
+
+        <div class="grid-box">
+            <div class="grid-title">Urban Planning</div>
+            <div class="grid-img-wrapper">
+                <img src="./usage_img/Urban_planning.png" alt="Urban Planning">
+            </div>
+            <div class="grid-desc">
+                <p>Traffic flow prediction for smart cities.</p>
+                <p>Based on large-scale user mobility data.</p>
+            </div>
+        </div>
+
+        <div class="grid-box">
+            <div class="grid-title">Economy Anlysis</div>
+            <div class="grid-img-wrapper">
+                <img src="./usage_img/Economy_anlysis.png" alt="User Behavior">
+            </div>
+            <div class="grid-desc">
+                <p>Demographic distribution analysis.</p>
+                <p>Active user tracking across regions.</p>
+            </div>
+        </div>
+
+        <div class="grid-box">
+            <div class="grid-title">Sustainable Development</div>
+            <div class="grid-img-wrapper">
+                <img src="./usage_img/Sustainable_development.png" alt="Architecture">
+            </div>
+            <div class="grid-desc">
+                <p>High-performance data processing pipeline.</p>
+                <p>Real-time visualization rendering engine.</p>
+            </div>
+        </div>
+
+    </section>
+
+    <script>
+        // Data Config
+        const myCities = [
+            { name: "Beijing", value: [116.6276, 40.2513] },
+            { name: "Shanghai", value: [121.5025, 31.2822] },
+            { name: "Nanjing", value: [118.7386, 31.9216] },
+            { name: "Nanchang", value: [115.9875, 28.6426] },
+            { name: "Nanning", value: [108.2948, 23.1218] },
+            { name: "Hangzhou", value: [119.4753, 29.8767] },
+            { name: "Jinan", value: [117.2714, 36.7634] },
+            { name: "Tianjin", value: [117.3372, 39.4029] },
+            { name: "Chongqing", value: [107.8682, 30.1848] },
+            { name: "Shijiazhuang", value: [114.5999, 38.1003] },
+            { name: "Taiyuan", value: [112.1572, 37.9386] },
+            { name: "Shenyang", value: [123.0223, 42.1183] },
+            { name: "Harbin", value: [127.4067, 45.3662] },
+            { name: "Hefei", value: [117.3298, 31.7473] },
+            { name: "Fuzhou", value: [119.1129, 25.9907] },
+            { name: "Zhengzhou", value: [113.4930, 34.6237] },
+            { name: "Wuhan", value: [114.3710, 30.6675] },
+            { name: "Changsha", value: [113.2369, 28.2577] },
+            { name: "Guangzhou", value: [113.5311, 23.2492] },
+            { name: "Haikou", value: [110.4262, 19.8079] },
+            { name: "Guiyang", value: [106.5981, 26.7722] },
+            { name: "Kunming", value: [102.9191, 25.4675] },
+            { name: "Xian", value: [109.1093, 34.2202] },
+            { name: "Lanzhou", value: [103.5388, 36.2853] },
+            { name: "Xining", value: [101.4673, 36.8462] },
+            { name: "Urumqi", value: [87.6434, 43.9595] },
+            { name: "Lhasa", value: [91.3855, 30.1496] },
+            { name: "Yinchuan", value: [106.2730, 38.2352] },
+            { name: "Hong Kong", value: [114.0601, 22.4119] },
+            { name: "Macau", value: [113.5667, 22.1396] },
+            { name: "Taipei", value: [121.5600, 25.0550] },
+            { name: "Chengdu", value: [103.8660, 30.7643] },
+            { name: "Yangjiang", value: [111.7190, 22.0978] },
+            { name: "Hohhot", value: [111.5567, 40.4858] },
+            { name: "Changchun", value: [125.6092, 44.2043] },
+            { name: "Tangshan", value: [118.2165, 39.6897] },
+            { name: "Nanyang", value: [112.1932, 33.0370] },
+            { name: "Zhuhai", value: [113.2396, 22.1470] },
+            { name: "Yantai", value: [120.8007, 37.2011] },
+            { name: "Zhumadian", value: [114.1088, 32.9074] }
+        ];
+
+        // Map Logic
+        var chart = echarts.init(document.getElementById('map-container'));
+
+        $.getJSON('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', function(geoJson) {
+            echarts.registerMap('china', geoJson);
+            var option = {
+                backgroundColor: 'rgba(0,0,0,0)',
+                geo: {
+                    map: 'china',
+                    roam: true, 
+                    zoom: 1.2,
+                    layoutCenter: ['50%', '60%'], 
+                    layoutSize: '100%',
+                    label: { show: false },
+                    tooltip: { show: false },
+                    itemStyle: {
+                        areaColor: '#1a2638', 
+                        borderColor: '#2d4663', 
+                        borderWidth: 1,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)',
+                        shadowBlur: 10
+                    },
+                    emphasis: { label: { show: false }, itemStyle: { areaColor: '#2a3b55' } }
+                },
+                series: [
+                    {
+                        name: 'Cities',
+                        type: 'effectScatter', 
+                        coordinateSystem: 'geo',
+                        data: myCities,
+                        symbolSize: 8, 
+                        rippleEffect: { brushType: 'fill', scale: 4 },
+                        itemStyle: { color: '#00f2ff', shadowBlur: 10, shadowColor: '#00f2ff' },
+                        tooltip: { show: true, formatter: '{b}', backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#00f2ff', textStyle: { color: '#fff' } },
+                        emphasis: { scale: 1.5, itemStyle: { color: '#fff' } },
+                        cursor: 'pointer'
+                    }
+                ]
+            };
+            chart.setOption(option);
+        });
+
+        function loadImage(imgId, path, fallbackText) {
+            var imgEl = $('#' + imgId);
+            imgEl.css('opacity', 0); 
+            setTimeout(function(){
+                imgEl.attr('src', path);
+                imgEl.off('load error'); 
+                imgEl.on('load', function() { $(this).css('opacity', 1); });
+                imgEl.on('error', function() { $(this).attr('src', "https://via.placeholder.com/600x400/000/333?text=" + encodeURIComponent(fallbackText)); $(this).css('opacity', 1); });
+            }, 100);
+        }
+
+        // Click Event (With Download)
+        chart.on('click', function(params) {
+            if (params.componentType === 'series') {
+                var data = params.data;
+                var cityName = data.name;
+
+                $('#city-title').text(cityName);
+                $('#city-status').text("Status: Online");
+                $('#city-status').css('color', '#00f2ff');
+                $('#coords-text').text(data.value[1].toFixed(2) + " N, " + data.value[0].toFixed(2) + " E");
+                $('.loading-text').hide();
+
+                var trafficPath = "./image/" + cityName + "_traffic.png";
+                var userPath = "./image/" + cityName + "_user.png";
+                loadImage('img-traffic', trafficPath, cityName + " Traffic N/A");
+                loadImage('img-user', userPath, cityName + " User N/A");
+
+                // Download Links
+                var trafficDlPath = "https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/" + cityName + "_500m_traffic.npz.zip";
+                var userDlPath = "https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/" + cityName + "_500m_user.npz.zip";
+
+                $('#btn-traffic').attr('href', trafficDlPath);
+                $('#btn-user').attr('href', userDlPath);
+                $('#dl-section').addClass('active');
+            }
+        });
+
+        window.onresize = function() { chart.resize(); };
+    </script>
+</body>
 </html>

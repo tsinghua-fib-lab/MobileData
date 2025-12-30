@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Description - MobileCN</title>
+    <style>
+        /* =========================== */
+        /* 复用全局基础样式             */
+        /* =========================== */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0f19;
+            color: white;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            overflow-y: auto;
+        }
+
+        /* 导航栏 */
+        .top-nav {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .top-nav a {
+            text-decoration: none;
+            color: #aab2c0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 16px;
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .top-nav a:hover, .top-nav a.active {
+            color: #00f2ff;
+            border-color: #00f2ff;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+            background: rgba(22, 27, 34, 1);
+            transform: translateY(-2px);
+        }
+
+        /* 内容容器 */
+        .container {
+            max-width: 1000px;
+            margin: 100px auto;
+            padding: 40px;
+            background: rgba(22, 27, 34, 0.6);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #00f2ff;
+            border-bottom: 2px solid #1f2d3d;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        p { color: #aab2c0; line-height: 1.6; }
+
+        /* =========================== */
+        /* 【新增】科技感表格样式       */
+        /* =========================== */
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .tech-table th, .tech-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .tech-table th {
+            background-color: rgba(0, 242, 255, 0.1);
+            color: #00f2ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            border-top: 1px solid #00f2ff;
+        }
+
+        .tech-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .code-snippet {
+            font-family: 'Courier New', monospace;
+            color: #ff7b72;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Logo 样式 */
+        .brand-logo { position: absolute; top: 30px; left: 40px; z-index: 999; }
+        .logo-text { font-size: 32px; font-weight: 800; color: #ffffff; }
+        .logo-highlight { color: #00f2ff; }
+
+    </style>
+</head>
+<body>
+
+    <a href="index.html" style="text-decoration: none;">
+        <div class="brand-logo">
+            <div class="logo-text">Mobile<span class="logo-highlight">CN</span></div>
+        </div>
+    </a>
+
+    <nav class="top-nav">
+        <a href="index.html">Dashboard</a>
+        <a href="data_description.html" class="active">Data Description</a>
+        <a href="method.html">Method</a>
+        <a href="contact_us.html">Contact Us</a>
+    </nav>
+
+    <div class="container">
+        <h1>Dataset Description</h1>
+        <p>The MobileCN dataset provides granular telecommunication data aggregated into 500m x 500m spatial grids. The data is anonymized to ensure user privacy while maintaining statistical utility for urban planning and network optimization.</p>
+
+        <h3>Data Format: CSV / NPZ</h3>
+        
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Data Type</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="code-snippet">grid_id</span></td>
+                    <td>String</td>
+                    <td>Unique identifier for the spatial grid (500m resolution).</td>
+                    <td>G_1024_503</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">timestamp</span></td>
+                    <td>DateTime</td>
+                    <td>Time of record (15-minute intervals).</td>
+                    <td>2025-12-01 08:15:00</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">user_count</span></td>
+                    <td>Integer</td>
+                    <td>Number of distinct active users in the grid.</td>
+                    <td>452</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">traffic_ul</span></td>
+                    <td>Float</td>
+                    <td>Total upload traffic volume (GB).</td>
+                    <td>12.5</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">traffic_dl</span></td>
+                    <td>Float</td>
+                    <td>Total download traffic volume (GB).</td>
+                    <td>89.3</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">app_category</span></td>
+                    <td>String</td>
+                    <td>Dominant application type (e.g., Video, Social, Game).</td>
+                    <td>Video_Streaming</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>License & Usage</h3>
+        <p>This dataset is released under the <strong>Creative Commons Attribution 4.0 International (CC BY 4.0)</strong> license. You are free to share and adapt the material for any purpose, provided appropriate credit is given.</p>
+    </div>
+
+</body>
+</html>
