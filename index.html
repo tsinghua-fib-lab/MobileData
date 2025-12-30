@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据下载页面</title>
+    <style>
+        /* 简单的页面布局样式 */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 图标容器样式 */
+        .download-btn {
+            cursor: pointer; /* 鼠标放上去变成小手 */
+            transition: transform 0.2s; /* 点击时的动画效果 */
+            text-decoration: none; /* 去掉下划线 */
+            text-align: center;
+            color: #333;
+        }
+
+        /* 鼠标悬停时的效果 */
+        .download-btn:hover {
+            transform: scale(1.1); /* 放大一点点 */
+        }
+
+        /* 图标本身的样式 */
+        .icon-svg {
+            width: 80px;
+            height: 80px;
+            fill: #4CAF50; /* 图标颜色：绿色 */
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/chengdu_traffic_2000m.npz" download="My_Dataset_2025" class="download-btn">
+        
+        <svg class="icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 4.02 2 6.5C2 8.98 6.48 11 12 11C17.52 11 22 8.98 22 6.5C22 4.02 17.52 2 12 2ZM12 4C16.66 4 20 5.48 20 6.5C20 7.52 16.66 9 12 9C7.34 9 4 7.52 4 6.5C4 5.48 7.34 4 12 4Z"/>
+            <path d="M2 9.5C2 10.99 5.09 12.36 9 12.83V16.5C5.09 16.03 2 14.66 2 13.17V9.5Z"/>
+            <path d="M22 9.5V13.17C22 14.66 18.91 16.03 15 16.5V12.83C18.91 12.36 22 10.99 22 9.5Z"/>
+            <path d="M12 15C16.66 15 20 16.05 20 17.5V19.83C18.91 20.3 17.5 20.61 16 20.81V17.07C14.77 17.2 13.43 17.27 12 17.27C10.57 17.27 9.23 17.2 8 17.07V20.81C6.5 20.61 5.09 20.3 4 19.83V17.5C4 16.05 7.34 15 12 15Z"/>
+        </svg>
+        
+        <h2>点击下载数据</h2>
+    </a>
+    </body>
+</html>
