@@ -57,7 +57,7 @@ def parse_args():
     parser.add_argument(
         "--shp_path",
         type=str,
-        default="./geographic_data/全国地级市边界/2024年初地级.shp",
+        default="./geographic_data/China_city_boundaries/2024年初地级.shp",
         help="Path to prefecture-level city boundary shapefile"
     )
     parser.add_argument(
