@@ -1,0 +1,29 @@
+#type: args
+
+train:
+  epochs: 2 # 320
+  batch_size: 1
+  lr: 1.0e-3
+
+diffusion:
+  layers: 4 
+  channels: 256 
+  nheads: 8
+  diffusion_embedding_dim: 128
+  beta_start: 0.0001
+  beta_end: 0.05 # 0.01~0.05
+  num_steps: 400 # 600
+  schedule: "quad"
+
+  multi_scale:
+    time_scale: 1
+    spatial_scale: 3
+    spatial_scale_coarse: 3
+
+model:
+  is_unconditional: False
+  timeemb: 128
+  spatialemb: 128
+  cond_emb: 128
+  feature_emb: 128
+  sim: 0.8

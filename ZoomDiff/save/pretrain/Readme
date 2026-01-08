@@ -1,0 +1,3 @@
+You can download the pretrained checkpoints from [https://cloud.tsinghua.edu.cn/d/3a31243b31f24031b39b/].
+
+This package contains two directories: **traffic_ckpt**, which holds the pretrained model for mobile traffic, and **user_ckpt**, which holds the pretrained model for the number of mobile users. Please place the pretrained models in this directory.

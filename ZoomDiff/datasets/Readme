@@ -1,0 +1,33 @@
+To obtain examples of condition files, data files, and the geographic data required to prepare these datasets, please visit [https://cloud.tsinghua.edu.cn/d/d51d3d9a936e463eba9e/] to preview and download them.
+
+Please ensure that the file structure in this directory is organized as follows:
+
+datasets
+├── cond
+│   └── 南京_cond.npz
+│
+├── data
+│   └── 南京_traffic_data.npz
+│
+├── data_preparation
+│   ├── Grid_meta.py
+│   ├── Env_extra.py
+│   ├── funcs.py
+│   ├── filtered_data
+│   │   └── 南京
+│   │       ├── filtered_南京_traffic.npz
+│   │       └── filtered_南京_user.npz 
+│   ├── geographic_data
+│   │   ├── chn_ppp_2020_constrained.tif
+│   │   ├── 全国地级市边界
+│   │   └── 南京
+│   │       ├── OSM_江苏省
+│   │       └── POI_南京
+│   └── src
+│       ├── Env_gen.sh
+│       └── Grid_meta_gen.sh
+│
+├── template_scaler_traffic.pkl
+├── template_scaler_user.pkl
+├── template_traffic.npz
+└── template_user.npz
