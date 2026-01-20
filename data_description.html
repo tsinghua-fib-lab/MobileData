@@ -149,39 +149,51 @@
             <tbody>
                 <tr>
                     <td><span class="code-snippet">grid_id</span></td>
-                    <td>String</td>
-                    <td>Unique identifier for the spatial grid (500m resolution).</td>
-                    <td>G_1024_503</td>
-                </tr>
-                <tr>
-                    <td><span class="code-snippet">timestamp</span></td>
-                    <td>DateTime</td>
-                    <td>Time of record (15-minute intervals).</td>
-                    <td>2025-12-01 08:15:00</td>
-                </tr>
-                <tr>
-                    <td><span class="code-snippet">user_count</span></td>
                     <td>Integer</td>
-                    <td>Number of distinct active users in the grid.</td>
-                    <td>452</td>
+                    <td>Unique identifier for the spatial grid (500m resolution).</td>
+                    <td>16</td>
                 </tr>
                 <tr>
-                    <td><span class="code-snippet">traffic_ul</span></td>
+                    <td><span class="code-snippet">lat, lon</span></td>
                     <td>Float</td>
-                    <td>Total upload traffic volume (GB).</td>
-                    <td>12.5</td>
+                    <td>Location (WGS 84 coordinate system).</td>
+                    <td>[39.453, 116.35]</td>
                 </tr>
                 <tr>
-                    <td><span class="code-snippet">traffic_dl</span></td>
+                    <td><span class="code-snippet">data_500m</span></td>
                     <td>Float</td>
-                    <td>Total download traffic volume (GB).</td>
-                    <td>89.3</td>
+                    <td>MetaData (Mobile traffic or Actie user, 1-hour intervals, 168-length).</td>
+                    <td>[43.9,1.39, 9.16,...,  54.2]</td>
                 </tr>
                 <tr>
-                    <td><span class="code-snippet">app_category</span></td>
-                    <td>String</td>
-                    <td>Dominant application type (e.g., Video, Social, Game).</td>
-                    <td>Video_Streaming</td>
+                    <td><span class="code-snippet">poi_500m</span></td>
+                    <td>Integer</td>
+                    <td>Point of Interest (21-length) </td>
+                    <td>[0 0 2 0 0 4 0 5 0 0 12 0 0 4 0 0 0 11 0 0 2]</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">water_area_500m</span></td>
+                    <td>Float</td>
+                    <td>Water area (meters).</td>
+                    <td>249918.96</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">roadlen_500m</span></td>
+                    <td>Float</td>
+                    <td>Road length (meters).</td>
+                    <td>2258.59</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">building_500m</span></td>
+                    <td>Integer</td>
+                    <td>Building numbers.</td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <td><span class="code-snippet">pop_500m</span></td>
+                    <td>Float</td>
+                    <td>Resident population size.</td>
+                    <td>216.082</td>
                 </tr>
             </tbody>
         </table>
