@@ -1,3 +1,6 @@
+# 📦 MobileCN data.
+**The dataset is available for download in [GitHub Releases](https://github.com/yourname/repo/releases).**
+
 # 📘 Workflow of Data Generation
 
 This README describes the complete workflow of **urban mobile traffic and mobile user distribution generation**, including **dataset preprocessing**, **model training**, and **model inference**. Please execute all commands in the following directory:
@@ -147,5 +150,6 @@ python ZoomDiff_infer.py \
 - 🎯 `--nsample`: Number of samples generated per single inference run
 
 ------
+
 
 ✨ *This pipeline ensures consistent preprocessing, reliable training, and reproducible inference across multiple cities.*
