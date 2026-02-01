@@ -1,5 +1,5 @@
 # 📦 MobileCN data.
-**The dataset is available for download in [GitHub Releases](https://github.com/yourname/repo/releases).**
+**The dataset is available for download in [GitHub Releases](https://github.com/tsinghua-fib-lab/MobileData/releases/tag/v1.0).**
 
 # 📘 Workflow of Data Generation
 
@@ -153,3 +153,4 @@ python ZoomDiff_infer.py \
 
 
 ✨ *This pipeline ensures consistent preprocessing, reliable training, and reproducible inference across multiple cities.*
+
