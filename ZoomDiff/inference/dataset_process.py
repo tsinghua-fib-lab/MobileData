@@ -3,8 +3,7 @@ import torch
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
-
-ZOOMDIFF_DIR = "ZoomDiff"
+from paths import ZOOMDIFF_DIR, city_cond_file
 
 # 基本参数
 is_normalize = True
@@ -126,7 +125,7 @@ def get_dataloader(args, batch_size=16):
 
 def raw_load(city, data_num):
     
-    file = np.load(f'{ZOOMDIFF_DIR}/datasets/cond/{city}_cond.npz', allow_pickle=True)
+    file = np.load(city_cond_file(city), allow_pickle=True)
 
     pop = file['pop_2000m']
     building = file['pop_2000m']

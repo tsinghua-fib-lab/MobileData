@@ -16,8 +16,12 @@ import os
 from tqdm.auto import tqdm, trange
 from contextlib import contextmanager
 import argparse
+from organize_geographic_data import CITY_EN
 
-DATA_PREP_DIR = os.path.join("ZoomDiff", "datasets", "data_preparation")
+DATASETS_DIR = os.path.join("ZoomDiff", "datasets")
+CITIES_DIR = os.path.join(DATASETS_DIR, "cities")
+DATA_PREP_DIR = os.path.join(DATASETS_DIR, "_data_preparation")
+SHARED_GEOGRAPHIC_DIR = os.path.join(DATASETS_DIR, "_shared_geographic_data")
 
 @contextmanager
 def step(desc: str):
@@ -53,15 +57,15 @@ def parse_args():
     parser.add_argument(
         "--data_path",
         type=str,
-        default=os.path.join(DATA_PREP_DIR, "raw_data_for_train/Nanchang/Nanchang_traffic.npz"),
-        help="Path to prefecture-level city boundary shapefile"
+        default=None,
+        help="Path to raw traffic or user data. Defaults to datasets/cities/<EnglishCity>/raw_data_for_train/<EnglishCity>_<datatype>.npz"
     )
     parser.add_argument(
         "--shp_path",
         type=str,
         default=os.path.join(
-            DATA_PREP_DIR,
-            "geographic_data/China_city_boundaries/china_city_boundaries_2024.shp"
+            SHARED_GEOGRAPHIC_DIR,
+            "China_city_boundaries/china_city_boundaries_2024.shp"
         ),
         help="Path to prefecture-level city boundary shapefile"
     )
@@ -69,8 +73,8 @@ def parse_args():
         "--pop_path",
         type=str,
         default=os.path.join(
-            DATA_PREP_DIR,
-            "geographic_data/chn_ppp_2020_constrained.tif"
+            SHARED_GEOGRAPHIC_DIR,
+            "chn_ppp_2020_constrained.tif"
         ),
         help="Path to population raster (.tif)"
     )
@@ -81,6 +85,14 @@ args = parse_args()
 
 # City Selection =============================================================
 cityname = args.cityname
+city_en = CITY_EN.get(cityname, cityname)
+if args.data_path is None:
+    args.data_path = os.path.join(
+        CITIES_DIR,
+        city_en,
+        "raw_data_for_train",
+        f"{city_en}_{args.datatype}.npz",
+    )
 os.makedirs(os.path.join(DATA_PREP_DIR, "results", cityname), exist_ok=True)
 
 SHP_pth = args.shp_path
@@ -248,10 +260,10 @@ with step("Aggregating to coarser resolutions"):
     data_2000m = reshape_4x4_blocks(data_500m)
     loc_2000m = get_loc_2000m(lat_edges_500m, lon_edges_500m)
 
-    data_dir = os.path.join(DATA_PREP_DIR, "datasets", "data")
+    data_dir = os.path.join(CITIES_DIR, city_en, "data")
     os.makedirs(data_dir, exist_ok=True)
     np.savez(
-        os.path.join(data_dir, f"{cityname}_{datatype}_data.npz"),
+        os.path.join(data_dir, f"{city_en}_{datatype}_data.npz"),
         data_2000m=data_2000m,
         loc_2000m=loc_2000m
     )

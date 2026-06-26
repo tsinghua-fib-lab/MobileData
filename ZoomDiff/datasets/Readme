@@ -3,31 +3,50 @@ To obtain examples of condition files, data files, and the geographic data requi
 Please ensure that the file structure in this directory is organized as follows:
 
 datasets
-├── cond
-│   └── 南京_cond.npz
+├── cities
+│   ├── Nanjing
+│   │   ├── cond
+│   │   │   └── Nanjing_cond.npz
+│   │   ├── data
+│   │   │   ├── Nanjing_traffic_data.npz
+│   │   │   └── Nanjing_user_data.npz
+│   │   ├── raw_data_for_train
+│   │   │   ├── Nanjing_traffic.npz
+│   │   │   └── Nanjing_user.npz
+│   │   └── geographic_data
+│   │       ├── OSM_Jiangsu
+│   │       └── POI_Nanjing
 │
-├── data
-│   └── 南京_traffic_data.npz
+│   └── Nanchang
+│       ├── cond
+│       │   └── Nanchang_cond.npz
+│       ├── data
+│       │   ├── Nanchang_traffic_data.npz
+│       │   └── Nanchang_user_data.npz
+│       ├── raw_data_for_train
+│       │   ├── Nanchang_traffic.npz
+│       │   └── Nanchang_user.npz
+│       └── geographic_data
+│           ├── OSM_Jiangxi
+│           └── POI_Nanchang
 │
-├── data_preparation
+├── _data_preparation
 │   ├── Grid_meta.py
 │   ├── Env_extra.py
 │   ├── funcs.py
-│   ├── filtered_data
-│   │   └── 南京
-│   │       ├── filtered_南京_traffic.npz
-│   │       └── filtered_南京_user.npz 
-│   ├── geographic_data
-│   │   ├── chn_ppp_2020_constrained.tif
-│   │   ├── China_city_boundaries
-│   │   └── 南京
-│   │       ├── OSM_江苏省
-│   │       └── POI_南京
+│   ├── organize_geographic_data.py
 │   └── src
 │       ├── Env_gen.sh
 │       └── Grid_meta_gen.sh
+│
+├── _shared_geographic_data
+│   ├── chn_ppp_2020_constrained.tif
+│   ├── China_city_boundaries
+│   └── Readme
 │
 ├── template_scaler_traffic.pkl
 ├── template_scaler_user.pkl
 ├── template_traffic.npz
 └── template_user.npz
+
+Each city should be placed under `cities` with its English directory name. The runtime loaders also accept supported Chinese city names and map them to the corresponding English dataset directory.

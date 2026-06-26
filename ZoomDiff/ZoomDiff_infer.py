@@ -27,8 +27,7 @@ from inference.utils import train, evaluate
 from joblib import load
 import joblib
 import pickle
-
-ZOOMDIFF_DIR = "ZoomDiff"
+from paths import ZOOMDIFF_DIR, city_cond_file
 
 dataset_list = '成都' # 成都*呼和浩特*南阳*唐山*烟台*阳江*长春*珠海*驻马店
 # 澳门*重庆*福州*广州*贵阳*哈尔滨*海口*合肥*昆明*拉萨*兰州*沈阳*石家庄*太原*天津*乌鲁木齐*武汉*西安*西宁*香港*银川*长沙*郑州
@@ -122,7 +121,7 @@ for city in typelist:
     save_gen = samples.reshape(H_areas, M_areas, M, L, H, H)
     save_gen = np.clip(save_gen, a_min=0, a_max=None)
 
-    data_file = np.load(os.path.join(ZOOMDIFF_DIR, "datasets", "cond", f"{city}_cond.npz"), allow_pickle=True)
+    data_file = np.load(city_cond_file(city), allow_pickle=True)
     data_dict = dict(data_file)
 
     data_save = save_gen.mean(axis=2)

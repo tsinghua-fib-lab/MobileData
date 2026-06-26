@@ -18,7 +18,10 @@ from contextlib import contextmanager
 import argparse
 from organize_geographic_data import CITY_EN, PROVINCE_EN
 
-DATA_PREP_DIR = os.path.join("ZoomDiff", "datasets", "data_preparation")
+DATASETS_DIR = os.path.join("ZoomDiff", "datasets")
+CITIES_DIR = os.path.join(DATASETS_DIR, "cities")
+DATA_PREP_DIR = os.path.join(DATASETS_DIR, "_data_preparation")
+SHARED_GEOGRAPHIC_DIR = os.path.join(DATASETS_DIR, "_shared_geographic_data")
 
 @contextmanager
 def step(desc: str):
@@ -49,8 +52,8 @@ def parse_args():
         "--shp_path",
         type=str,
         default=os.path.join(
-            DATA_PREP_DIR,
-            "geographic_data/China_city_boundaries/china_city_boundaries_2024.shp"
+            SHARED_GEOGRAPHIC_DIR,
+            "China_city_boundaries/china_city_boundaries_2024.shp"
         ),
         help="Path to prefecture-level city boundary shapefile"
     )
@@ -58,8 +61,8 @@ def parse_args():
         "--pop_path",
         type=str,
         default=os.path.join(
-            DATA_PREP_DIR,
-            "geographic_data/chn_ppp_2020_constrained.tif"
+            SHARED_GEOGRAPHIC_DIR,
+            "chn_ppp_2020_constrained.tif"
         ),
         help="Path to population raster (.tif)"
     )
@@ -85,9 +88,9 @@ cityname = args.cityname
 city_en = CITY_EN.get(args.cityname, args.cityname)
 province_en = PROVINCE_EN.get(args.province, args.province)
 if args.osm_dir is None:
-    args.osm_dir = os.path.join(DATA_PREP_DIR, f"geographic_data/{city_en}/OSM_{province_en}")
+    args.osm_dir = os.path.join(CITIES_DIR, city_en, "geographic_data", f"OSM_{province_en}")
 if args.poi_dir is None:
-    args.poi_dir = os.path.join(DATA_PREP_DIR, f"geographic_data/{city_en}/POI_{city_en}")
+    args.poi_dir = os.path.join(CITIES_DIR, city_en, "geographic_data", f"POI_{city_en}")
 os.makedirs(os.path.join(DATA_PREP_DIR, "results", cityname), exist_ok=True)
 
 SHP_pth = args.shp_path
@@ -261,10 +264,10 @@ with step("Aggregating to coarser resolutions"):
     poi_2000m = reshape_4x4_blocks(poi_500m)
     loc_2000m = get_loc_2000m(lat_edges_500m, lon_edges_500m)
 
-    cond_dir = os.path.join(DATA_PREP_DIR, "datasets", "cond")
+    cond_dir = os.path.join(CITIES_DIR, city_en, "cond")
     os.makedirs(cond_dir, exist_ok=True)
     np.savez(
-        os.path.join(cond_dir, f"{cityname}_cond.npz"),
+        os.path.join(cond_dir, f"{city_en}_cond.npz"),
         pop_2000m=pop_2000m,
         building_2000m=building_2000m,
         roadlen_2000m=roadlen_2000m,

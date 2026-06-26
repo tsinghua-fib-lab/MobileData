@@ -1,2 +1,4 @@
 # ZoomDiff/datasets/data_preparation/geographic_data/*.tif
 data_mobile/
+.agents
+.codex

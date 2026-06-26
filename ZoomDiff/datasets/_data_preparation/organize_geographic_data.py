@@ -4,8 +4,9 @@ import shutil
 from pathlib import Path
 
 
-DATA_PREP_DIR = Path("ZoomDiff") / "datasets" / "data_preparation"
-TARGET_ROOT = DATA_PREP_DIR / "geographic_data"
+DATASETS_DIR = Path("ZoomDiff") / "datasets"
+CITIES_DIR = DATASETS_DIR / "cities"
+DATA_PREP_DIR = DATASETS_DIR / "_data_preparation"
 SOURCE_GROUPS = [
     DATA_PREP_DIR / "source_geographic_data" / "pretrain",
     DATA_PREP_DIR / "source_geographic_data" / "test1",
@@ -188,10 +189,9 @@ def copy_poi(src_geo: Path, dst_city: Path, city_en: str) -> tuple[str, int]:
 
 def remove_old_city_dirs() -> None:
     for city_cn, city_en in CITY_EN.items():
-        for name in (city_cn, city_en):
-            path = TARGET_ROOT / name
-            if path.exists():
-                shutil.rmtree(path)
+        path = CITIES_DIR / city_en / "geographic_data"
+        if path.exists():
+            shutil.rmtree(path)
 
 
 def main() -> None:
@@ -200,13 +200,12 @@ def main() -> None:
     if missing:
         raise RuntimeError(f"Missing source geographic_data for: {', '.join(missing)}")
 
-    TARGET_ROOT.mkdir(parents=True, exist_ok=True)
     remove_old_city_dirs()
 
     for city_cn in sorted(CITY_EN, key=CITY_EN.get):
         city_en = CITY_EN[city_cn]
         src_geo = sources[city_cn]
-        dst_city = TARGET_ROOT / city_en
+        dst_city = CITIES_DIR / city_en / "geographic_data"
         dst_city.mkdir(parents=True, exist_ok=True)
 
         osm_name = copy_osm(src_geo, dst_city)

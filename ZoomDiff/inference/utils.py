@@ -8,8 +8,7 @@ import math
 import torch.nn as nn
 import torch.nn.utils as utils
 from sklearn.preprocessing import MinMaxScaler
-
-ZOOMDIFF_DIR = "ZoomDiff"
+from paths import ZOOMDIFF_DIR, city_cond_file
 
 # 梯度裁剪阈值
 MAX_NORM = 1.0
@@ -154,7 +153,7 @@ def evaluate(args, model, scaler, shape_2000_all, test_loader, foldername=""):
                     all_generated_samples[name] = torch.cat(all_generated_samples[name], dim=0).squeeze(-1).cpu().numpy()
                     all_generated_samples_scale[name] = torch.cat(all_generated_samples_scale[name], dim=0).squeeze(-1).cpu().numpy()
 
-                    file = np.load(f"{ZOOMDIFF_DIR}/datasets/cond/{name}_cond.npz", allow_pickle=True)
+                    file = np.load(city_cond_file(name), allow_pickle=True)
                     file_dict = {k: file[k] for k in file.files}
 
                     # 加载人口数据

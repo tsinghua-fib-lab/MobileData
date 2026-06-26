@@ -7,10 +7,10 @@ set -e
 CITYNAME="澳门"
 PROVINCE="澳门特别行政区"
 
-SHP_PATH="./ZoomDiff/datasets/data_preparation/geographic_data/China_city_boundaries/china_city_boundaries_2024.shp"
-POP_PATH="./ZoomDiff/datasets/data_preparation/geographic_data/chn_ppp_2020_constrained.tif"
+SHP_PATH="./ZoomDiff/datasets/_shared_geographic_data/China_city_boundaries/china_city_boundaries_2024.shp"
+POP_PATH="./ZoomDiff/datasets/_shared_geographic_data/chn_ppp_2020_constrained.tif"
 
-python ./ZoomDiff/datasets/data_preparation/Env_extra.py \
+python ./ZoomDiff/datasets/_data_preparation/Env_extra.py \
   --cityname "${CITYNAME}" \
   --province "${PROVINCE}" \
   --shp_path "${SHP_PATH}" \
