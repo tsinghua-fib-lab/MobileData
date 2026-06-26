@@ -1,4 +1,3 @@
-#!/bin/bash
 set -e
 
 # =====================================
@@ -9,14 +8,11 @@ CITYNAME="南京"
 PROVINCE="江苏省"
 DATATYPE="traffic"
 
-DATA_PATH="./datasets/data_preparation/filtered_data/${CITYNAME}/filtered_${CITYNAME}_${DATATYPE}.npz"
-SHP_PATH="./datasets/data_preparation/geographic_data/全国地级市边界/2024年初地级.shp"
-POP_PATH="./datasets/data_preparation/geographic_data/chn_ppp_2020_constrained.tif"
+DATA_PATH="./ZoomDiff/datasets/data_preparation/filtered_data/${CITYNAME}/filtered_${CITYNAME}_${DATATYPE}.npz"
+SHP_PATH="./ZoomDiff/datasets/data_preparation/geographic_data/China_city_boundaries/china_city_boundaries_2024.shp"
+POP_PATH="./ZoomDiff/datasets/data_preparation/geographic_data/chn_ppp_2020_constrained.tif"
 
-OSM_DIR="./datasets/data_preparation/geographic_data/${CITYNAME}/OSM_${PROVINCE}"
-POI_DIR="./datasets/data_preparation/geographic_data/${CITYNAME}/POI_${CITYNAME}"
-
-python ./datasets/data_preparation/Grid_meta.py \
+python ./ZoomDiff/datasets/data_preparation/Grid_meta.py \
   --cityname "${CITYNAME}" \
   --province "${PROVINCE}" \
   --data_path "${DATA_PATH}" \

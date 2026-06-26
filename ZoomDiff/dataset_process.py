@@ -4,6 +4,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
+ZOOMDIFF_DIR = "ZoomDiff"
+
 # 基本参数
 is_normalize = True
 time_length = 168
@@ -192,10 +194,10 @@ def get_dataloader(args, batch_size=16):
 
 def raw_load(city, datatype, data_num):
     
-    file_data = np.load(f'./datasets/data/{city}_{datatype}_data.npz', allow_pickle=True)
+    file_data = np.load(f'{ZOOMDIFF_DIR}/datasets/data/{city}_{datatype}_data.npz', allow_pickle=True)
     data = file_data['data_2000m']
 
-    file_cond = np.load(f'./datasets/cond/{city}_cond.npz', allow_pickle=True)
+    file_cond = np.load(f'{ZOOMDIFF_DIR}/datasets/cond/{city}_cond.npz', allow_pickle=True)
     pop = file_cond['pop_2000m']
     building = file_cond['pop_2000m']
     roadlen = file_cond['roadlen_2000m']

@@ -5,14 +5,30 @@ import datetime
 import json
 import yaml
 import os
-import setproctitle
-from torch.utils.tensorboard import SummaryWriter
+try:
+    import setproctitle
+except ImportError:
+    setproctitle = None
+try:
+    from torch.utils.tensorboard import SummaryWriter
+except ImportError:
+    class SummaryWriter:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def add_scalar(self, *args, **kwargs):
+            pass
+
+        def close(self):
+            pass
 from main_model import CSDI_Value
 from inference.dataset_process import get_dataloader
 from inference.utils import train, evaluate
 from joblib import load
 import joblib
 import pickle
+
+ZOOMDIFF_DIR = "ZoomDiff"
 
 dataset_list = '成都' # 成都*呼和浩特*南阳*唐山*烟台*阳江*长春*珠海*驻马店
 # 澳门*重庆*福州*广州*贵阳*哈尔滨*海口*合肥*昆明*拉萨*兰州*沈阳*石家庄*太原*天津*乌鲁木齐*武汉*西安*西宁*香港*银川*长沙*郑州
@@ -39,20 +55,25 @@ parser.add_argument("--nsample", type=int, default=1)
 args = parser.parse_args()
 args.task_state = task_state
 args.fewshot_rate = fewshot_rate
-setproctitle.setproctitle("Multi-scale CSDI-" + args.dataset + "@qxq")
+if setproctitle is not None:
+    setproctitle.setproctitle("Multi-scale CSDI-" + args.dataset + "@qxq")
 print(args)
 
-path = "config/" + args.config
+path = os.path.join(ZOOMDIFF_DIR, "config", args.config)
 with open(path, "r") as f:
     config = yaml.safe_load(f)
 
 print(json.dumps(config, indent=4))
 
 current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-foldername = f"./save/{args.datatype}_{args.dataset}_t{str(config['diffusion']['multi_scale']['time_scale'])}s{str(config['diffusion']['multi_scale']['spatial_scale'])}_{current_time}/"
+foldername = os.path.join(
+    ZOOMDIFF_DIR,
+    "save",
+    f"{args.datatype}_{args.dataset}_t{str(config['diffusion']['multi_scale']['time_scale'])}s{str(config['diffusion']['multi_scale']['spatial_scale'])}_{current_time}",
+)
 print('model folder:', foldername)
 os.makedirs(foldername, exist_ok=True)
-with open(foldername + "config.json", "w") as f:
+with open(os.path.join(foldername, "config.json"), "w") as f:
     json.dump(config, f, indent=4)
 
 args.config = config
@@ -65,18 +86,18 @@ model = CSDI_Value(args).to(args.device)
 
 if args.task_state in ['test', 'zero-shot', 'few-shot']:
     args.modelfolder = modelfolder
-    model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
-    scaler = load(f'./datasets/template_scaler_{datatype}.pkl')
+    model.load_state_dict(torch.load(os.path.join(ZOOMDIFF_DIR, "save", args.modelfolder, "model.pth")))
+    scaler = load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_scaler_{datatype}.pkl"))
 
 total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print("Total Parameters:", total_params)
 
-writer = SummaryWriter(log_dir=foldername + 'logs/', flush_secs=5)
+writer = SummaryWriter(log_dir=os.path.join(foldername, "logs"), flush_secs=5)
 
 evaluate(args, model, scaler, shape_2000_all, test_loader, foldername=foldername)
 
 # Sort out the data from the output results
-result_path = foldername + '/generated_outputs_nsample' + str(args.nsample) + '.pk' 
+result_path = os.path.join(foldername, "generated_outputs_nsample" + str(args.nsample) + ".pk")
 with open(result_path, 'rb') as f:
     all_datatype, all_samples, all_samples_scale, _, all_observed_time, all_observed_loc, all_scalers = pickle.load(f)
 
@@ -84,12 +105,12 @@ typelist = np.unique(all_datatype)
 print("Generated City List: ", typelist)
 
 # Load Template Data (to correct the inverse normalization value)
-file_TP = np.load(f"./datasets/template_{datatype}.npz", allow_pickle=True)
+file_TP = np.load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_{datatype}.npz"), allow_pickle=True)
 pop_TP = file_TP["pop_2000m"]
 data_TP = file_TP["data_2000m"]
 mean_TP = data_TP.mean()
 max_TP = data_TP.max()
-scaler_TP = joblib.load(f'./datasets/template_scaler_{datatype}.pkl')
+scaler_TP = joblib.load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_scaler_{datatype}.pkl"))
 
 for city in typelist:
 
@@ -101,7 +122,7 @@ for city in typelist:
     save_gen = samples.reshape(H_areas, M_areas, M, L, H, H)
     save_gen = np.clip(save_gen, a_min=0, a_max=None)
 
-    data_file = np.load(f"./datasets/cond/{city}_cond.npz", allow_pickle=True)
+    data_file = np.load(os.path.join(ZOOMDIFF_DIR, "datasets", "cond", f"{city}_cond.npz"), allow_pickle=True)
     data_dict = dict(data_file)
 
     data_save = save_gen.mean(axis=2)
@@ -177,5 +198,8 @@ for city in typelist:
         verbose=True
     )
     data_dict["data_2000m"] = data_final
-    np.savez(f"./results/{city}_{datatype}.npz", **data_dict)
-    print(f"Final Results have saved at ./results/{city}_{args.datatype}.npz")
+    results_dir = os.path.join(ZOOMDIFF_DIR, "results")
+    os.makedirs(results_dir, exist_ok=True)
+    result_file = os.path.join(results_dir, f"{city}_{datatype}.npz")
+    np.savez(result_file, **data_dict)
+    print(f"Final Results have saved at {result_file}")

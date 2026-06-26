@@ -1,1 +1,2 @@
-ZoomDiff/datasets/data_preparation/geographic_data/*.tif
+# ZoomDiff/datasets/data_preparation/geographic_data/*.tif
+data_mobile/

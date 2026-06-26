@@ -16,6 +16,9 @@ import os
 from tqdm.auto import tqdm, trange
 from contextlib import contextmanager
 import argparse
+from organize_geographic_data import CITY_EN, PROVINCE_EN
+
+DATA_PREP_DIR = os.path.join("ZoomDiff", "datasets", "data_preparation")
 
 @contextmanager
 def step(desc: str):
@@ -45,25 +48,31 @@ def parse_args():
     parser.add_argument(
         "--shp_path",
         type=str,
-        default="../../公共地理数据/地级市边界/2024年初地级.shp",
+        default=os.path.join(
+            DATA_PREP_DIR,
+            "geographic_data/China_city_boundaries/china_city_boundaries_2024.shp"
+        ),
         help="Path to prefecture-level city boundary shapefile"
     )
     parser.add_argument(
         "--pop_path",
         type=str,
-        default="../../公共地理数据/chn_ppp_2020_constrained.tif",
+        default=os.path.join(
+            DATA_PREP_DIR,
+            "geographic_data/chn_ppp_2020_constrained.tif"
+        ),
         help="Path to population raster (.tif)"
     )
     parser.add_argument(
         "--osm_dir",
         type=str,
-        default=f"./地理数据/OSM_四川省/",
+        default=None,
         help="Directory containing OSM shapefiles"
     )
     parser.add_argument(
         "--poi_dir",
         type=str,
-        default=f"./地理数据/POI_成都/",
+        default=None,
         help="Directory containing POI CSV files"
     )
 
@@ -73,7 +82,13 @@ args = parse_args()
 
 # City Selection =============================================================
 cityname = args.cityname
-os.makedirs(f'./results/{cityname}/', exist_ok=True)
+city_en = CITY_EN.get(args.cityname, args.cityname)
+province_en = PROVINCE_EN.get(args.province, args.province)
+if args.osm_dir is None:
+    args.osm_dir = os.path.join(DATA_PREP_DIR, f"geographic_data/{city_en}/OSM_{province_en}")
+if args.poi_dir is None:
+    args.poi_dir = os.path.join(DATA_PREP_DIR, f"geographic_data/{city_en}/POI_{city_en}")
+os.makedirs(os.path.join(DATA_PREP_DIR, "results", cityname), exist_ok=True)
 
 SHP_pth = args.shp_path
 with step("Reading prefecture-level city boundary shapefile"):
@@ -246,8 +261,10 @@ with step("Aggregating to coarser resolutions"):
     poi_2000m = reshape_4x4_blocks(poi_500m)
     loc_2000m = get_loc_2000m(lat_edges_500m, lon_edges_500m)
 
+    cond_dir = os.path.join(DATA_PREP_DIR, "datasets", "cond")
+    os.makedirs(cond_dir, exist_ok=True)
     np.savez(
-        f'./datasets/cond/{cityname}_cond.npz',
+        os.path.join(cond_dir, f"{cityname}_cond.npz"),
         pop_2000m=pop_2000m,
         building_2000m=building_2000m,
         roadlen_2000m=roadlen_2000m,
