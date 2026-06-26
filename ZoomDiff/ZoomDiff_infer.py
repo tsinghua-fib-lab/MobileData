@@ -35,7 +35,6 @@ dataset_list = 'Nanchang*Nanjing'
 datatype = 'traffic' # user
 task_state = 'test' #'train', 'test', 'zero-shot', 'few-shot'
 fewshot_rate = 0.1
-modelfolder = f'pretrain/{datatype}_ckpt/'
 
 parser = argparse.ArgumentParser(description="Multi-scale CSDI")
 
@@ -97,9 +96,10 @@ args, test_loader, shape_2000_all = get_dataloader(
 model = CSDI_Value(args).to(args.device)
 
 if args.task_state in ['test', 'zero-shot', 'few-shot']:
-    args.modelfolder = modelfolder
+    if args.modelfolder == "":
+        args.modelfolder = f"pretrain/{args.datatype}_ckpt"
     model.load_state_dict(torch.load(os.path.join(ZOOMDIFF_DIR, "save", args.modelfolder, "model.pth")))
-    scaler = load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_scaler_{datatype}.pkl"))
+    scaler = load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_scaler_{args.datatype}.pkl"))
 
 total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print("Total Parameters:", total_params)
@@ -117,12 +117,12 @@ typelist = np.unique(all_datatype)
 print("Generated City List: ", typelist)
 
 # Load Template Data (to correct the inverse normalization value)
-file_TP = np.load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_{datatype}.npz"), allow_pickle=True)
+file_TP = np.load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_{args.datatype}.npz"), allow_pickle=True)
 pop_TP = file_TP["pop_2000m"]
 data_TP = file_TP["data_2000m"]
 mean_TP = data_TP.mean()
 max_TP = data_TP.max()
-scaler_TP = joblib.load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_scaler_{datatype}.pkl"))
+scaler_TP = joblib.load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_scaler_{args.datatype}.pkl"))
 
 CITY_CN = {v: k for k, v in CITY_EN.items()}
 
@@ -335,6 +335,6 @@ for city in typelist:
     )
     results_dir = os.path.join(ZOOMDIFF_DIR, "results")
     os.makedirs(results_dir, exist_ok=True)
-    result_file = os.path.join(results_dir, f"{city}_500m_{datatype}.npz")
+    result_file = os.path.join(results_dir, f"{city}_500m_{args.datatype}.npz")
     np.savez(result_file, **data_500m)
     print(f"Final Results have saved at {result_file}")

@@ -84,7 +84,7 @@ scalers_dir = os.path.join(foldername, "scalers")
 os.makedirs(scalers_dir, exist_ok=True)
 for city, scaler in scaler_all.items():
     
-    dump(scaler, os.path.join(scalers_dir, f"scaler_{city}_{datatype}.pkl"))
+    dump(scaler, os.path.join(scalers_dir, f"scaler_{city}_{args.datatype}.pkl"))
 
 model = CSDI_Value(args).to(args.device)
 
