@@ -33,7 +33,7 @@ def scale_preprocess_spatial(data, spatial_scale):
     return X
 
 class Traffic_Dataset(Dataset):
-    def __init__(self, config, city, datatype, eval_length=time_length, data_num=200, use_index_list=None, seed=0):
+    def __init__(self, config, city, datatype, eval_length=time_length, data_num=-1, use_index_list=None, seed=0):
         self.eval_length = eval_length
         np.random.seed(seed)  # seed for ground truth choice
 

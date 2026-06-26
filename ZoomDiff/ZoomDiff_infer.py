@@ -35,7 +35,7 @@ dataset_list = 'Nanchang*Nanjing'
 datatype = 'traffic' # user
 task_state = 'test' #'train', 'test', 'zero-shot', 'few-shot'
 fewshot_rate = 0.1
-modelfolder = ''
+modelfolder = 'pretrain/traffic_ckpt/'
 
 parser = argparse.ArgumentParser(description="Multi-scale CSDI")
 

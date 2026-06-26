@@ -2,3 +2,6 @@
 data_mobile/
 .agents
 .codex
+ZoomDiff/save/traffic_*
+ZoomDiff/save/user_*
+ZoomDiff/__pycache__

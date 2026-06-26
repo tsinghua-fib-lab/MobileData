@@ -33,7 +33,7 @@ def scale_preprocess_spatial(data, spatial_scale):
     return X
 
 class Traffic_Dataset(Dataset):
-    def __init__(self, config, city, eval_length=time_length, data_num=100, use_index_list=None, seed=0):
+    def __init__(self, config, city, eval_length=time_length, data_num=-1, use_index_list=None, seed=0):
         self.eval_length = eval_length
         np.random.seed(seed)  # seed for ground truth choice
 
@@ -113,10 +113,11 @@ def get_dataloader(args, batch_size=16):
 
             shape_2000_all[city] = test_dataset.shape_2000
             print(f"{city}2km网格规模：{shape_2000_all[city]}")
+            print(f"地区：{city}↑ ===========================\n")
 
             args.H = test_dataset.observed_cond_static.shape[-1]
             test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
-
+        
         test_loader_all.append([city, test_loader])
 
     test_loader_all = [(name, i) for name, data in test_loader_all for i in data]
@@ -128,7 +129,7 @@ def raw_load(city, data_num):
     file = np.load(city_cond_file(city), allow_pickle=True)
 
     pop = file['pop_2000m']
-    building = file['pop_2000m']
+    building = file['pop_2000m'] # building
     roadlen = file['roadlen_2000m']
     water_area = file['water_area_2000m']
     poi = file['poi_2000m']
@@ -143,19 +144,6 @@ def raw_load(city, data_num):
     poi_emb = np.array(poi, dtype=np.float32).reshape(-1, 4, 4, 21) # (N, H, H, 21)
     loc = np.array(loc, dtype=np.float32).reshape(-1, 4) # (N, 4)
 
-    # 时不变筛选
-    is_constant_per_pixel = np.all(np.var(data, axis=-1) == 0, axis=(1, 2))
-
-    # 取出“时变”的样本
-    valid_idx = ~is_constant_per_pixel
-    data = data[valid_idx]
-    pop = pop[valid_idx]
-    building = building[valid_idx]
-    roadlen = roadlen[valid_idx]
-    water_area = water_area[valid_idx]
-    poi_emb = poi_emb[valid_idx]
-    loc = loc[valid_idx]
-    
     data = np.expand_dims(data, axis=1) # (N, K, L, H, H)
     st_info = np.concatenate([np.expand_dims(pop, axis=1), np.expand_dims(building, axis=1), np.expand_dims(roadlen, axis=1), np.expand_dims(water_area, axis=1)], axis=1) # (N, Ds, H, H), 静态条件信息
 
