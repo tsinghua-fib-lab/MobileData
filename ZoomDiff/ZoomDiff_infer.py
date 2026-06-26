@@ -27,10 +27,11 @@ from inference.utils import train, evaluate
 from joblib import load
 import joblib
 import pickle
-from paths import ZOOMDIFF_DIR, city_cond_file
+import shapefile
+from matplotlib.path import Path
+from paths import CITY_EN, ZOOMDIFF_DIR, city_cond_file
 
-dataset_list = '成都' # 成都*呼和浩特*南阳*唐山*烟台*阳江*长春*珠海*驻马店
-# 澳门*重庆*福州*广州*贵阳*哈尔滨*海口*合肥*昆明*拉萨*兰州*沈阳*石家庄*太原*天津*乌鲁木齐*武汉*西安*西宁*香港*银川*长沙*郑州
+dataset_list = 'Nanchang*Nanjing'
 datatype = 'traffic' # user
 task_state = 'test' #'train', 'test', 'zero-shot', 'few-shot'
 fewshot_rate = 0.1
@@ -40,7 +41,7 @@ parser = argparse.ArgumentParser(description="Multi-scale CSDI")
 
 parser.add_argument("--dataset", type=str, default=dataset_list)
 parser.add_argument("--datatype", type=str, default=datatype)
-parser.add_argument('--device', default='cuda:3', help='Device for Attack')
+parser.add_argument('--device', default='cuda:0', help='Device for Attack')
 
 parser.add_argument("--config", type=str, default="base.yaml")
 parser.add_argument("--seed", type=int, default=1)
@@ -50,6 +51,18 @@ parser.add_argument(
 parser.add_argument("--unconditional", action="store_true")
 parser.add_argument("--modelfolder", type=str, default="")
 parser.add_argument("--nsample", type=int, default=1)
+parser.add_argument(
+    "--shp_path",
+    type=str,
+    default=os.path.join(
+        ZOOMDIFF_DIR,
+        "datasets",
+        "_shared_geographic_data",
+        "China_city_boundaries",
+        "china_city_boundaries_2024.shp",
+    ),
+    help="Path to the city boundary shapefile used to mask 500m outputs",
+)
 
 args = parser.parse_args()
 args.task_state = task_state
@@ -110,6 +123,122 @@ data_TP = file_TP["data_2000m"]
 mean_TP = data_TP.mean()
 max_TP = data_TP.max()
 scaler_TP = joblib.load(os.path.join(ZOOMDIFF_DIR, "datasets", f"template_scaler_{datatype}.pkl"))
+
+CITY_CN = {v: k for k, v in CITY_EN.items()}
+
+def load_city_boundaries(shp_path):
+    sf = shapefile.Reader(shp_path, encoding="utf-8")
+    field_names = [field[0] for field in sf.fields[1:]]
+    return field_names, sf.records(), sf.shapes()
+
+
+def get_city_boundary_path(city, field_names, records, shapes):
+    city = str(city)
+    city_cn = CITY_CN.get(city, city)
+    candidates = {city, city_cn, f"{city_cn}市"}
+
+    for record, shape in zip(records, shapes):
+        values = dict(zip(field_names, record))
+        searchable = [
+            str(values.get("地名", "")),
+            str(values.get("地级", "")),
+            str(values.get("ENG_NAME", "")),
+            str(values.get("NAME_2", "")),
+        ]
+        if any(
+            candidate == value or candidate in value or value in candidate
+            for candidate in candidates
+            for value in searchable
+            if candidate and value
+        ):
+            vertices = []
+            codes = []
+            parts = list(shape.parts) + [len(shape.points)]
+            for i in range(len(parts) - 1):
+                pts = shape.points[parts[i]:parts[i + 1]]
+                if not pts:
+                    continue
+                vertices.append(pts[0])
+                codes.append(Path.MOVETO)
+                for point in pts[1:]:
+                    vertices.append(point)
+                    codes.append(Path.LINETO)
+                if pts[-1] != pts[0]:
+                    vertices.append(pts[0])
+                    codes.append(Path.CLOSEPOLY)
+                else:
+                    codes[-1] = Path.CLOSEPOLY
+            if vertices:
+                return Path(vertices, codes)
+
+    raise ValueError(f"Could not find city boundary in shapefile for {city}")
+
+
+def convert_2000m_to_masked_500m(data_dict, city, field_names, records, shapes):
+    loc_2000m = data_dict["loc_2000m"]
+    data_2000m = data_dict["data_2000m"]
+
+    H_area, W_area = data_2000m.shape[:2]
+    if loc_2000m.ndim == 3 and loc_2000m.shape[:2] == (W_area, H_area):
+        loc_2000m = loc_2000m.transpose(1, 0, 2)
+    if loc_2000m.shape[:2] != (H_area, W_area):
+        H_area, W_area = loc_2000m.shape[:2]
+
+    H_sub, W_sub = 4, 4
+    H_total = H_area * H_sub
+    W_total = W_area * W_sub
+
+    lats_1d = np.zeros(H_total)
+    for i in range(H_area):
+        rmin = loc_2000m[i, :, 0].min()
+        rmax = loc_2000m[i, :, 1].max()
+        step = (rmax - rmin) / H_sub
+        lats_1d[i * H_sub:(i + 1) * H_sub] = np.linspace(
+            rmin + step / 2, rmax - step / 2, H_sub
+        )
+
+    lons_1d = np.zeros(W_total)
+    for j in range(W_area):
+        cmin = loc_2000m[:, j, 2].min()
+        cmax = loc_2000m[:, j, 3].max()
+        step = (cmax - cmin) / W_sub
+        lons_1d[j * W_sub:(j + 1) * W_sub] = np.linspace(
+            cmin + step / 2, cmax - step / 2, W_sub
+        )
+
+    xx, yy = np.meshgrid(lons_1d, lats_1d)
+    points = np.vstack((xx.ravel(), yy.ravel())).T
+    city_path = get_city_boundary_path(city, field_names, records, shapes)
+    mask_2d = city_path.contains_points(points).reshape(H_total, W_total)
+
+    output_data = {}
+    for key, arr in data_dict.items():
+        if key == "loc_2000m" or "2000m" not in key:
+            continue
+
+        arr_500m = None
+        if arr.ndim == 5:
+            if arr.shape[2] == 4 and arr.shape[3] == 4:
+                temp = arr
+            elif arr.shape[3] == 4 and arr.shape[4] == 4:
+                temp = arr.transpose(0, 1, 3, 4, 2)
+            else:
+                temp = None
+            if temp is not None:
+                arr_500m = temp.transpose(0, 2, 1, 3, 4).reshape(H_total, W_total, -1)
+        elif arr.ndim == 4 and arr.shape[2] == 4 and arr.shape[3] == 4:
+            arr_500m = arr.transpose(0, 2, 1, 3).reshape(H_total, W_total)
+        elif arr.ndim in (2, 3) and arr.shape[:2] == (H_area, W_area):
+            arr_500m = np.repeat(np.repeat(arr, H_sub, axis=0), W_sub, axis=1)
+
+        if arr_500m is not None:
+            output_data[key.replace("2000m", "500m")] = arr_500m[mask_2d]
+
+    output_data["lat"] = yy[mask_2d]
+    output_data["lon"] = xx[mask_2d]
+    return output_data
+
+boundary_field_names, boundary_records, boundary_shapes = load_city_boundaries(args.shp_path)
 
 for city in typelist:
 
@@ -197,8 +326,15 @@ for city in typelist:
         verbose=True
     )
     data_dict["data_2000m"] = data_final
+    data_500m = convert_2000m_to_masked_500m(
+        data_dict,
+        city,
+        boundary_field_names,
+        boundary_records,
+        boundary_shapes,
+    )
     results_dir = os.path.join(ZOOMDIFF_DIR, "results")
     os.makedirs(results_dir, exist_ok=True)
-    result_file = os.path.join(results_dir, f"{city}_{datatype}.npz")
-    np.savez(result_file, **data_dict)
+    result_file = os.path.join(results_dir, f"{city}_500m_{datatype}.npz")
+    np.savez(result_file, **data_500m)
     print(f"Final Results have saved at {result_file}")
