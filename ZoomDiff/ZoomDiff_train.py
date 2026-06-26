@@ -28,7 +28,7 @@ from model_freeze import freeze_all, unfreeze_fewshot_modules
 
 ZOOMDIFF_DIR = "ZoomDiff"
 
-dataset_list = '南昌' # 北京*富阳*济南*南昌*南京*南宁*上海
+dataset_list = 'Nanchang*Nanjing' # 北京*富阳*济南*南昌*南京*南宁*上海
 datatype = 'traffic' # user
 task_state = 'train' #'train', 'test', 'zero-shot', 'few-shot'
 fewshot_rate = 0.1
@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(description="Multi-scale CSDI")
 
 parser.add_argument("--dataset", type=str, default=dataset_list)
 parser.add_argument("--datatype", type=str, default=datatype)
-parser.add_argument('--device', default='cuda:3', help='Device for Attack')
+parser.add_argument('--device', default='cuda:0', help='Device for Attack')
 
 parser.add_argument("--config", type=str, default="base.yaml")
 parser.add_argument("--seed", type=int, default=1)
