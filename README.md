@@ -12,9 +12,11 @@ Run all commands from the repository root directory, because the scripts use pat
 - [Model Training](#model-training)
 - [Key Arguments](#key-arguments)
 
+<a id="generation-with-pretrained-checkpoints"></a>
+
 ## 🚀 Generation with Pretrained Checkpoints
 
-### 1. Prepare Geographic Data
+### 1️⃣ Prepare Geographic Data
 
 Download the geographic data required by the generation pipeline:
 
@@ -42,7 +44,9 @@ ZoomDiff/datasets
     └── chn_ppp_2020_constrained.tif
 ```
 
-### 2. Build Condition Files
+<a id="build-condition-files"></a>
+
+### 2️⃣ Build Condition Files
 
 `Env_extra.py` creates environmental condition files, including population, road length, water area, building count, and POI features.
 
@@ -52,14 +56,6 @@ Run:
 python ZoomDiff/datasets/_data_preparation/Env_extra.py \
   --cityname <City> \
   --province <Province>
-```
-
-Example:
-
-```bash
-python ZoomDiff/datasets/_data_preparation/Env_extra.py \
-  --cityname Nanchang \
-  --province Jiangxi
 ```
 
 By default, the script reads:
@@ -75,19 +71,13 @@ and writes:
 ZoomDiff/datasets/cities/<City>/cond/<City>_cond.npz
 ```
 
-If your OSM or POI directories use different paths, add:
-
-```bash
---osm_dir "<OSM_DIR>" --poi_dir "<POI_DIR>"
-```
-
 You can also edit and run the example script:
 
 ```bash
 bash ZoomDiff/datasets/_data_preparation/src/Env_gen.sh
 ```
 
-### 3. Run Pretrained Inference
+### 3️⃣ Run Pretrained Inference
 
 ZoomDiff is the generative model used for MobileCN. It is based on:
 
@@ -144,9 +134,11 @@ ZoomDiff/results/<City>_500m_<datatype>.npz
 
 The output includes `data_500m`, condition features converted to 500 m where applicable, and masked grid coordinates `lat` and `lon`.
 
+<a id="model-training"></a>
+
 ## 🧪 Model Training
 
-### 1. Prepare Training Data
+### 1️⃣ Prepare Training Data
 
 Training uses the same geographic data as pretrained inference. In addition, you need raw base-station-level measurements for mobile traffic and/or mobile user counts.
 
@@ -176,24 +168,12 @@ ZoomDiff/datasets
     └── chn_ppp_2020_constrained.tif
 ```
 
-Raw measurement files should be placed at:
-
-```text
-ZoomDiff/datasets/cities/<City>/raw_data_for_train/<City>_<datatype>.npz
-```
-
-Each raw `.npz` file is expected to include:
-
-- `<datatype>`: base-station-level time series, where `<datatype>` is `traffic` or `user`
-- `long`: base station longitudes
-- `lat`: base station latitudes
-
-### 2. Preprocess Training Inputs
+### 2️⃣ Preprocess Training Inputs
 
 The preprocessing pipeline has two parts:
 
-1. `Grid_meta.py` converts raw base-station-level measurements into gridded training data.
-2. `Env_extra.py` creates condition files, such as population, road length, water area, building count, and POI features.
+- `Grid_meta.py` converts raw base-station-level measurements into gridded training data.
+- `Env_extra.py` creates condition files, such as population, road length, water area, building count, and POI features.
 
 #### 2.1 Create Gridded Training Data
 
@@ -206,27 +186,12 @@ python ZoomDiff/datasets/_data_preparation/Grid_meta.py \
   --datatype <Datatype>
 ```
 
-Example:
-
-```bash
-python ZoomDiff/datasets/_data_preparation/Grid_meta.py \
-  --cityname Nanchang \
-  --province Jiangxi \
-  --datatype traffic
-```
-
 `<Datatype>` should be either `traffic` or `user`.
 
 The script writes:
 
 ```text
 ZoomDiff/datasets/cities/<City>/data/<City>_<datatype>_data.npz
-```
-
-If the raw data is not in the default location, add:
-
-```bash
---data_path "<RAW_DATA_NPZ>"
 ```
 
 You can also edit and run the example script:
@@ -237,7 +202,7 @@ bash ZoomDiff/datasets/_data_preparation/src/Grid_meta_gen.sh
 
 #### 2.2 Create Condition Files
 
-Run `Env_extra.py` as described in [Build Condition Files](#2-build-condition-files):
+Run `Env_extra.py` as described in [Build Condition Files](#build-condition-files):
 
 ```bash
 python ZoomDiff/datasets/_data_preparation/Env_extra.py \
@@ -245,7 +210,7 @@ python ZoomDiff/datasets/_data_preparation/Env_extra.py \
   --province <Province>
 ```
 
-### 3. Train ZoomDiff
+### 3️⃣ Train ZoomDiff
 
 Run:
 
@@ -256,34 +221,27 @@ python ZoomDiff/ZoomDiff_train.py \
   --device <Device>
 ```
 
-For multiple cities, separate city names with `*`:
-
-```bash
-python ZoomDiff/ZoomDiff_train.py \
-  --dataset Nanchang*Nanjing \
-  --datatype traffic \
-  --device cuda:0
-```
-
 The script prints the model output directory, for example:
 
 ```text
 model folder: ZoomDiff/save/traffic_<Cities>_t1s3_YYYYMMDD_HHMMSS
 ```
 
+<a id="key-arguments"></a>
+
 ## ⚙️ Key Arguments
 
-| Argument | Used by | Description |
-| --- | --- | --- |
-| `--cityname` | `Env_extra.py`, `Grid_meta.py` | English city name, such as `Nanchang`. |
-| `--province` | `Env_extra.py`, `Grid_meta.py` | English province name used by `OSM_<Province>`, such as `Jiangxi`. |
-| `--dataset` | `ZoomDiff_train.py`, `ZoomDiff_infer.py` | One city or multiple cities separated by `*`, such as `Nanchang*Nanjing`. |
-| `--datatype` | `Grid_meta.py`, `ZoomDiff_train.py`, `ZoomDiff_infer.py` | `traffic` or `user`. |
-| `--device` | `ZoomDiff_train.py`, `ZoomDiff_infer.py` | `cpu`, `cuda:0`, `cuda:1`, etc. |
-| `--nsample` | `ZoomDiff_infer.py` | Number of generated samples per inference run. |
-| `--modelfolder` | `ZoomDiff_train.py`, `ZoomDiff_infer.py` | Checkpoint directory relative to `ZoomDiff/save`. |
-| `--shp_path` | `Env_extra.py`, `Grid_meta.py`, `ZoomDiff_infer.py` | City boundary shapefile path. |
-| `--pop_path` | `Env_extra.py`, `Grid_meta.py` | Population raster path. |
-| `--osm_dir` | `Env_extra.py` | Optional custom OSM directory. |
-| `--poi_dir` | `Env_extra.py` | Optional custom POI directory. |
-| `--data_path` | `Grid_meta.py` | Optional custom raw `.npz` file for training preprocessing. |
+| Argument          | Used by                                                        | Description                                                                  |
+| ----------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `--cityname`    | `Env_extra.py`, `Grid_meta.py`                             | English city name, such as`Nanchang`.                                      |
+| `--province`    | `Env_extra.py`, `Grid_meta.py`                             | English province name used by`OSM_<Province>`, such as `Jiangxi`.        |
+| `--dataset`     | `ZoomDiff_train.py`, `ZoomDiff_infer.py`                   | One city or multiple cities separated by`*`, such as `Nanchang*Nanjing`. |
+| `--datatype`    | `Grid_meta.py`, `ZoomDiff_train.py`, `ZoomDiff_infer.py` | `traffic` or `user`.                                                     |
+| `--device`      | `ZoomDiff_train.py`, `ZoomDiff_infer.py`                   | `cpu`, `cuda:0`, `cuda:1`, etc.                                        |
+| `--nsample`     | `ZoomDiff_infer.py`                                          | Number of generated samples per inference run.                               |
+| `--modelfolder` | `ZoomDiff_train.py`, `ZoomDiff_infer.py`                   | Checkpoint directory relative to`ZoomDiff/save`.                           |
+| `--shp_path`    | `Env_extra.py`, `Grid_meta.py`, `ZoomDiff_infer.py`      | City boundary shapefile path.                                                |
+| `--pop_path`    | `Env_extra.py`, `Grid_meta.py`                             | Population raster path.                                                      |
+| `--osm_dir`     | `Env_extra.py`                                               | Optional custom OSM directory.                                               |
+| `--poi_dir`     | `Env_extra.py`                                               | Optional custom POI directory.                                               |
+| `--data_path`   | `Grid_meta.py`                                               | Optional custom raw`.npz` file for training preprocessing.                 |
