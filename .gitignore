@@ -8,3 +8,4 @@ ZoomDiff/__pycache__
 ZoomDiff/results/*
 ZoomDiff/datasets/_data_preparation/results
 *__pycache__*
+.git*
