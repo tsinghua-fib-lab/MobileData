@@ -1,16 +1,51 @@
 # MobileCN | Data and Workflow
 
-The MobileCN dataset is available from [GitHub Releases](https://github.com/tsinghua-fib-lab/MobileData/releases/tag/v1.0).
-
 This document describes the workflow for generating **urban mobile traffic** and **mobile user distributions** with ZoomDiff, including data preparation, pretrained inference, and model training.
 
 Run all commands from the repository root directory, because the scripts use paths such as `ZoomDiff/datasets/...`.
 
 ## Contents
 
+- [Data Assets](#data-assets)
 - [Generation with Pretrained Checkpoints](#generation-with-pretrained-checkpoints)
 - [Model Training](#model-training)
 - [Key Arguments](#key-arguments)
+
+<a id="data-assets"></a>
+
+## 📦 Data Assets
+
+The prepared `data_mobile/` data has been uploaded to the [`v1.0` GitHub Release](https://github.com/tsinghua-fib-lab/MobileData/releases/tag/v1.0) as per-city `.tar.zst` assets.
+
+Asset naming:
+
+```text
+MobileCN_data_mobile_<City>.tar.zst
+MobileCN_data_mobile__shared_geographic_data.tar.zst
+SHA256SUMS.txt
+```
+
+For example, to download and extract Nanchang:
+
+```bash
+wget https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/MobileCN_data_mobile_Nanchang.tar.zst
+mkdir -p data_mobile
+tar -I zstd -xf MobileCN_data_mobile_Nanchang.tar.zst -C data_mobile
+```
+
+Download the shared geographic data in the same way:
+
+```bash
+wget https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/MobileCN_data_mobile__shared_geographic_data.tar.zst
+tar -I zstd -xf MobileCN_data_mobile__shared_geographic_data.tar.zst -C data_mobile
+```
+
+To verify downloaded files:
+
+```bash
+wget https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/SHA256SUMS.txt
+sha256sum -c SHA256SUMS.txt
+```
 
 <a id="generation-with-pretrained-checkpoints"></a>
 
@@ -26,7 +61,7 @@ Download the geographic data required by the generation pipeline:
 
 > **Important:** POI data used for training and inference must share the same set of `bigtype` categories and identical category encodings.
 
-Organize `ZoomDiff/datasets` as follows. City and province directory names are expected to be in English, for example `Nanchang` and `Jiangxi`.
+Geographic data of some major cities in China are available from [GitHub Releases](https://github.com/tsinghua-fib-lab/MobileData/releases/tag/v1.0). Organize `ZoomDiff/datasets` as follows. City and province directory names are expected to be in English, for example `Nanchang` and `Jiangxi`.
 
 ```text
 ZoomDiff/datasets
