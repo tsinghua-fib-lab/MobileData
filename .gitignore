@@ -1,7 +1,10 @@
-# ZoomDiff/datasets/data_preparation/geographic_data/*.tif
+ZoomDiff/datasets/_shared_geographic_data/chn_ppp_2020_constrained.tif
 data_mobile/
 .agents
 .codex
 ZoomDiff/save/traffic_*
 ZoomDiff/save/user_*
 ZoomDiff/__pycache__
+ZoomDiff/results/*
+ZoomDiff/datasets/_data_preparation/results
+*__pycache__*

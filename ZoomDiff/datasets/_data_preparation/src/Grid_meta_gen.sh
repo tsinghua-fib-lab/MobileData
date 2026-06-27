@@ -4,8 +4,8 @@ set -e
 # Run DATA preparation for TRAIN cities
 # =====================================
 
-CITYNAME="南京"
-PROVINCE="江苏省"
+CITYNAME="Nanchang"
+PROVINCE="Jiangxi"
 DATATYPE="traffic"
 
 SHP_PATH="./ZoomDiff/datasets/_shared_geographic_data/China_city_boundaries/china_city_boundaries_2024.shp"

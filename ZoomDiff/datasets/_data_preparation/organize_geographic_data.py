@@ -19,7 +19,6 @@ CITY_EN = {
     "南京": "Nanjing",
     "南宁": "Nanning",
     "南昌": "Nanchang",
-    "富阳": "Fuyang",
     "杭州": "Hangzhou",
     "济南": "Jinan",
     "南阳": "Nanyang",

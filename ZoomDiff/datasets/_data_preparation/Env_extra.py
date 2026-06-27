@@ -22,6 +22,7 @@ DATASETS_DIR = os.path.join("ZoomDiff", "datasets")
 CITIES_DIR = os.path.join(DATASETS_DIR, "cities")
 DATA_PREP_DIR = os.path.join(DATASETS_DIR, "_data_preparation")
 SHARED_GEOGRAPHIC_DIR = os.path.join(DATASETS_DIR, "_shared_geographic_data")
+CITY_CN = {city_en: city_cn for city_cn, city_en in CITY_EN.items()}
 
 @contextmanager
 def step(desc: str):
@@ -39,14 +40,14 @@ def parse_args():
     parser.add_argument(
         "--cityname",
         type=str,
-        default="成都",
-        help="City name in Chinese"
+        default="Nanchang",
+        help="City name in English"
     )
     parser.add_argument(
         "--province",
         type=str,
-        default="四川省",
-        help="Province name in Chinese"
+        default="Jiangxi",
+        help="Province name in English"
     )
     parser.add_argument(
         "--shp_path",
@@ -85,19 +86,27 @@ args = parse_args()
 
 # City Selection =============================================================
 cityname = args.cityname
-city_en = CITY_EN.get(args.cityname, args.cityname)
+city_cn = CITY_CN.get(cityname, cityname)
+city_en = CITY_EN.get(city_cn, cityname)
 province_en = PROVINCE_EN.get(args.province, args.province)
 if args.osm_dir is None:
     args.osm_dir = os.path.join(CITIES_DIR, city_en, "geographic_data", f"OSM_{province_en}")
 if args.poi_dir is None:
     args.poi_dir = os.path.join(CITIES_DIR, city_en, "geographic_data", f"POI_{city_en}")
-os.makedirs(os.path.join(DATA_PREP_DIR, "results", cityname), exist_ok=True)
+os.makedirs(os.path.join(DATA_PREP_DIR, "results", city_en), exist_ok=True)
 
 SHP_pth = args.shp_path
 with step("Reading prefecture-level city boundary shapefile"):
     gdf = gpd.read_file(SHP_pth)
 
-city_boundary = gdf[gdf["地名"].str.contains(cityname)].geometry.values[0]
+city_matches = gdf[gdf["地名"].astype(str).str.contains(city_cn, regex=False, na=False)]
+if city_matches.empty:
+    examples = ", ".join(gdf["地名"].dropna().astype(str).head(10).tolist())
+    raise ValueError(
+        f"Cannot find city boundary for {cityname!r} (mapped Chinese name: {city_cn!r}) "
+        f"in column '地名'. Example values: {examples}"
+    )
+city_boundary = city_matches.geometry.values[0]
 long_min, lat_min, long_max, lat_max = city_boundary.bounds
 # long_min, lat_min, long_max, lat_max = 115.80, 28.68, 115.90, 28.73
 
@@ -224,7 +233,7 @@ label_map = {major: idx for idx, major in enumerate(unique_majors)}
 # Keep only POIs within the target city
 poi_df = (
     poi_df[
-        poi_df[df_cityname].isin([f'{cityname}市'])
+        poi_df[df_cityname].isin([f'{city_cn}市'])
     ]
     .dropna(subset=[df_lon_wgs84, df_lat_wgs84, df_bigType])
     .copy()
