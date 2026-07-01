@@ -15,36 +15,13 @@ Run all commands from the repository root directory, because the scripts use pat
 
 ## 📦 Data Assets
 
-The prepared `data_mobile/` data has been uploaded to the [`v1.0` GitHub Release](https://github.com/tsinghua-fib-lab/MobileData/releases/tag/v1.0) as per-city `.tar.zst` assets.
+The prepared open environment data has been uploaded to the [`v1.0` GitHub Release](https://github.com/tsinghua-fib-lab/MobileData/releases/tag/v1.0) as per-city `.tar.zst` assets.
 
 Asset naming:
 
 ```text
 MobileCN_data_mobile_<City>.tar.zst
 MobileCN_data_mobile__shared_geographic_data.tar.zst
-SHA256SUMS.txt
-```
-
-For example, to download and extract Nanchang:
-
-```bash
-wget https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/MobileCN_data_mobile_Nanchang.tar.zst
-mkdir -p data_mobile
-tar -I zstd -xf MobileCN_data_mobile_Nanchang.tar.zst -C data_mobile
-```
-
-Download the shared geographic data in the same way:
-
-```bash
-wget https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/MobileCN_data_mobile__shared_geographic_data.tar.zst
-tar -I zstd -xf MobileCN_data_mobile__shared_geographic_data.tar.zst -C data_mobile
-```
-
-To verify downloaded files:
-
-```bash
-wget https://github.com/tsinghua-fib-lab/MobileData/releases/download/v1.0/SHA256SUMS.txt
-sha256sum -c SHA256SUMS.txt
 ```
 
 <a id="generation-with-pretrained-checkpoints"></a>
