@@ -28,6 +28,8 @@ MobileCN_data_mobile__shared_geographic_data.tar.zst
 
 ## 🚀 Generation with Pretrained Checkpoints
 
+<p align="center"><strong>MobileCN Data Generation Pipeline</strong></p>
+
 ![MobileCN data generation pipeline](readme_figs/pipeline.png)
 
 This figure shows the MobileCN data generation pipeline.
@@ -98,6 +100,8 @@ bash ZoomDiff/datasets/_data_preparation/src/Env_gen.sh
 ZoomDiff is the generative model used for MobileCN. It is based on:
 
 > X. Qi, H. Chai, S. Liu, L. Yue, R. Pan, Y. Wang, and Y. Li, "Denoising refinement diffusion models for simultaneous generation of multi-scale mobile network traffic," *arXiv preprint arXiv:2511.17532*, Oct. 2025, doi: 10.48550/arXiv.2511.17532.
+
+<p align="center"><strong>ZoomDiff Model Architecture</strong></p>
 
 ![ZoomDiff model architecture](readme_figs/zoomdiff.png)
 
